@@ -167,13 +167,14 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
             let event = Event(context: context)
             event.habit = self.fetchedResultsController.object(at: indexPath)
             event.timestamp = Date()
+            self.saveContext()
         }
         
         let deleteHabit = UITableViewRowAction(style: .destructive, title: "Eliminar") { (action, indexPath) in
             context.delete(self.fetchedResultsController.object(at: indexPath))
-            
+            self.saveContext()
         }
-        self.saveContext()
+        
         
         return [logHabit, deleteHabit]
     }

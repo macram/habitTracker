@@ -145,19 +145,53 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
                 fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
             }
         }
+        if editingStyle == .insert {
+            let context = fetchedResultsController.managedObjectContext
+            context.delete(fetchedResultsController.object(at: indexPath))
+            
+            do {
+                try context.save()
+            } catch {
+                // Replace this implementation with code to handle the error appropriately.
+                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+                let nserror = error as NSError
+                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+            }
+        }
     }
-
+    
+    override func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        let context = self.fetchedResultsController.managedObjectContext
+        
+        let logHabit = UITableViewRowAction(style: .normal, title: "¡Hecho!") { (action, indexPath) in
+            let event = Event(context: context)
+            event.habit = self.fetchedResultsController.object(at: indexPath)
+            event.timestamp = Date()
+        }
+        
+        let deleteHabit = UITableViewRowAction(style: .destructive, title: "Eliminar") { (action, indexPath) in
+            context.delete(self.fetchedResultsController.object(at: indexPath))
+            
+        }
+        self.saveContext()
+        
+        return [logHabit, deleteHabit]
+    }
+    
     func configureCell(_ cell: UITableViewCell, withHabit habit: Habit) {
         cell.textLabel!.text = habit.name!
         
         let calendar = Calendar(identifier: Calendar.Identifier.gregorian)
         let todayComponents = calendar.dateComponents([.day, .month, .year], from: Date())
-        let aWeekAgoDate = calendar.date(byAdding: .day, value: -7, to: Date())
+        let todayDate = calendar.date(from: todayComponents)!
+        let aWeekAgoDate = calendar.date(byAdding: .day, value: -7, to: todayDate)
         
+        let filterDayPredicate = NSPredicate(format: "timestamp >= %@", argumentArray: [todayDate])
+        let todayEvents = habit.events!.filtered(using: filterDayPredicate)
         let filterWeekPredicate = NSPredicate(format: "timestamp >= %@", argumentArray: [aWeekAgoDate])
         let weekEvents = habit.events!.filtered(using: filterWeekPredicate)
         
-        cell.detailTextLabel!.text = "\(weekEvents.count) hoy, \(habit.events!.count) siempre"
+        cell.detailTextLabel!.text = "\(todayEvents.count) hoy, \(weekEvents.count) esta semana, \(habit.events!.count) siempre"
     }
 
     // MARK: - Fetched results controller

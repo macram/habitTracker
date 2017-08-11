@@ -149,6 +149,15 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
 
     func configureCell(_ cell: UITableViewCell, withHabit habit: Habit) {
         cell.textLabel!.text = habit.name!
+        
+        let calendar = Calendar(identifier: Calendar.Identifier.gregorian)
+        let todayComponents = calendar.dateComponents([.day, .month, .year], from: Date())
+        let aWeekAgoDate = calendar.date(byAdding: .day, value: -7, to: Date())
+        
+        let filterWeekPredicate = NSPredicate(format: "timestamp >= %@", argumentArray: [aWeekAgoDate])
+        let weekEvents = habit.events!.filtered(using: filterWeekPredicate)
+        
+        cell.detailTextLabel!.text = "\(weekEvents.count) hoy, \(habit.events!.count) siempre"
     }
 
     // MARK: - Fetched results controller

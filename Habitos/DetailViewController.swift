@@ -9,36 +9,32 @@
 import UIKit
 
 class DetailViewController: UIViewController {
+    
+    var viewModel = DetailViewModel()
 
-    @IBOutlet weak var detailDescriptionLabel: UILabel!
-
-
-    func configureView() {
-        // Update the user interface for the detail item.
-        if let detail = detailItem {
-            if let label = detailDescriptionLabel {
-                label.text = detail.timestamp!.description
-            }
+    func configureNavigation() {
+        var titleForController = ""
+        
+        if viewModel.habit?.name != nil {
+            titleForController = viewModel.habit!.name!
         }
+        
+        self.navigationController?.navigationItem.title = titleForController
+        
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        configureView()
+        configureNavigation()
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-    var detailItem: Event? {
-        didSet {
-            // Update the view.
-            configureView()
-        }
-    }
+//    var detailItem: Habit? {
+//        didSet {
+//            // Update the view.
+//            configureNavigation()
+//        }
+//    }
 
 
 }
